@@ -24,24 +24,37 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
       <string>Зображення</string>
      </attribute>
-     <widget class="QLabel" name="label">
+     <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>27</x>
-        <y>25</y>
-        <width>721</width>
-        <height>481</height>
+        <x>570</x>
+        <y>20</y>
+        <width>191</width>
+        <height>131</height>
        </rect>
       </property>
-      <property name="text">
-       <string/>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="make_gif">
+         <property name="text">
+          <string>Зробити gif</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="make_mp4">
+         <property name="text">
+          <string>Зробити mp4</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
