@@ -70,20 +70,15 @@ class MapWindow(QDialog):
             self.heights.append(self.height_point.height)
         else:
             self.heights.append(0)
-        self.weight_poly.append(((self.height_cam / 1000) * self.heights[self.count] / (self.focus / 1000))
+        self.weight_poly.append(((self.weight_cam / 1000) * self.heights[self.count] / (self.focus / 1000))
                                 * self.parties_h)
-        #self.height_poly.append(((self.weight_cam / 1000) * self.heights[self.count] / (self.focus / 1000))
-         #                       * self.parties_w)
-        self.height_poly.append(30)
-        #self.weight_poly.append(50)
-        print(self.height_poly[self.count])
-        print(self.weight_poly[self.count])
+        self.height_poly.append(((self.height_cam / 1000) * self.heights[self.count] / (self.focus / 1000))
+                                * self.parties_w)
         if self.count > 0:
             self.ways[0] = int((np.linalg.norm(self.points[self.count] - self.points[0])
-                                + self.weight_poly[self.count]) / self.weight_poly[self.count])
+                                + self.height_poly[self.count]) / self.height_poly[self.count])
             self.ways.append(int((np.linalg.norm(self.points[self.count - 1] - self.points[self.count])
-                                  + self.weight_poly[self.count]) / self.weight_poly[self.count]))
-        print(self.ways[self.count])
+                                  + self.height_poly[self.count]) / self.height_poly[self.count]))
 
     def paintEvent(self, event):
         painter = QPainter()
@@ -101,11 +96,11 @@ class MapWindow(QDialog):
             if i > 0:
                 painter.setBrush(QtGui.QBrush(QtGui.QColor(55, 60, 61, 100)))
                 for j in range(self.ways[i]):
-                    temp_point = self.findStepLine(self.points[i - 1], self.points[i], j, self.weight_poly[i])
+                    temp_point = self.findStepLine(self.points[i - 1], self.points[i], j, self.height_poly[i])
                     painter.drawPolygon(
-                        self.createPolygon(4, math.sqrt(self.weight_poly[i] ** 2 + self.weight_poly[i] ** 2) / 2,  # радіус рівний половині діагоналі
+                        self.createPolygon(4, math.sqrt(self.height_poly[i] ** 2 + self.height_poly[i] ** 2) / 2,  # радіус рівний половині діагоналі
                                            self.angels[i], temp_point[0], temp_point[1],
-                                           self.weight_poly[i]))
+                                           self.weight_poly[i] - self.height_poly[i]))
 
         painter.end()
         self.update()
@@ -137,16 +132,14 @@ class MapWindow(QDialog):
             cos_b = scalar_ba_bc / (mod_ba * mod_bc)
             self.angels.append(-math.degrees(math.acos(cos_b)) + self.angels[len(self.angels) - 1])
 
-    def findStepLine(self, point1, point2, count, step):  # points[i - 1], points[i]
+    @staticmethod
+    def findStepLine(point1, point2, count, step):  # points[i - 1], points[i]
         len = np.linalg.norm(point1 - point2)
-        print('len')
-        print(len)
-        print('step')
-        print(count)
         point3 = point1 + (point2 - point1) * ((count * step) / len)
         return point3
 
-    def createPolygon(self, n, r, s, x_coord, y_coord, weight):  # ОБЕРЕЖНО ГОВНОКОД!!!!!!1!!!!!1!!                           (шучу він скрізь)
+    @staticmethod
+    def createPolygon(n, r, s, x_coord, y_coord, weight):  # ОБЕРЕЖНО ГОВНОКОД!!!!!!1!!!!!1!!                           (шучу він скрізь)
         polygon = QtGui.QPolygonF()
         point = []
         w = 360 / n
@@ -171,8 +164,20 @@ class MapWindow(QDialog):
         y4 = r * math.sin(math.radians(t4))
         point.append(np.array([x4, y4, 0]))
 
-        polygon.append(QtCore.QPointF(x_coord + x1, y_coord))
-        polygon.append(QtCore.QPointF(x_coord + x2, y_coord + y2))
-        polygon.append(QtCore.QPointF(x_coord + x3, y_coord + y3))
-        polygon.append(QtCore.QPointF(x_coord + x4, y_coord + y4))
+        len1 = np.linalg.norm(point[3] - point[0])
+        temp_point1 = point[3] + (point[0] - point[3]) * ((len1 + weight) / len1)
+
+        len2 = np.linalg.norm(point[2] - point[1])
+        temp_point2 = point[2] + (point[1] - point[2]) * ((len2 + weight) / len2)
+
+        len3 = np.linalg.norm(point[1] - point[2])
+        temp_point3 = point[1] + (point[2] - point[1]) * ((len3 + weight) / len3)
+
+        len4 = np.linalg.norm(point[0] - point[3])
+        temp_point4 = point[0] + (point[3] - point[0]) * ((len4 + weight) / len4)
+
+        polygon.append(QtCore.QPointF(x_coord + temp_point1[0], y_coord + temp_point1[1]))
+        polygon.append(QtCore.QPointF(x_coord + temp_point2[0], y_coord + temp_point2[1]))
+        polygon.append(QtCore.QPointF(x_coord + temp_point3[0], y_coord + temp_point3[1]))
+        polygon.append(QtCore.QPointF(x_coord + temp_point4[0], y_coord + temp_point4[1]))
         return polygon
