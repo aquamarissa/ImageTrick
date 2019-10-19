@@ -3,8 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from demo_2 import *
-from demo_1_python import *
+from qtmain import *
+from main import *
 import math
 import numpy as np
 
@@ -67,6 +67,7 @@ class MapWindow(QDialog):
         self.height_poly = []
         self.weight_poly = []
         self.bool_end = False
+        self.percent_bool_end = False
         self.percent_start = 0
         self.percent_per_hundred = 0
         self.percent_per_photo = 0
@@ -79,7 +80,7 @@ class MapWindow(QDialog):
         if self.acces:
             self.percent_point.append(self.percent_start)
             self.percent.setText("Заряд дрона " + str(self.percent_start) + "%")
-            self.percent.move(850, 5)
+            self.percent.move(850, 2)
             self.percent.setFont(QFont('ubuntu', 24))
             self.end_points.move(2, 802)
             self.end_points.resize(500, 30)
@@ -165,10 +166,11 @@ class MapWindow(QDialog):
                                        end_angel, temp_point[0], temp_point[1],
                                        self.weight_poly[len(self.weight_poly) - 1] -
                                        self.height_poly[len(self.height_poly) - 1]))
-            self.percentAfterWay(self.points[len(self.points) - 1], self.points[0])
-            self.percent_point[self.count] -= self.ways[0] * self.percent_per_photo
-            self.percent.setText("Заряд дрона " + str(int(self.percent_point[len(self.percent_point) - 1])) + "%")
-            self.bool_end = False
+            if self.percent_bool_end:
+                self.percentAfterWay(self.points[len(self.points) - 1], self.points[0])
+                self.percent_point[self.count] -= self.ways[0] * self.percent_per_photo
+                self.percent.setText("Заряд дрона " + str(int(self.percent_point[len(self.percent_point) - 1])) + "%")
+            self.percent_bool_end = False
         painter.end()
         self.update()
 
@@ -205,6 +207,7 @@ class MapWindow(QDialog):
 
     def finishPoints(self):
         self.bool_end = True
+        self.percent_bool_end = True
 
     @staticmethod
     def findStepLine(point1, point2, count, step):  # points[i - 1], points[i]
